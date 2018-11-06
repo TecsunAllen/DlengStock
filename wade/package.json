@@ -1,0 +1,16 @@
+{
+    "name": "wade",
+    "displayName": "Sharp git",
+    "description": "use git in vscode more easlier",
+    "version": "0.0.1",
+    "publisher": "sharpGit",
+    "engines": {
+        "vscode": "^1.28.0"
+    },
+    "categories": [
+        "Extension Packs"
+    ],
+    "extensionPack": [ 
+        "publisher.extensionName"
+    ]
+}
