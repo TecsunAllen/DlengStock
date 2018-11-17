@@ -5,14 +5,16 @@ import App from './App';
 import router from './router';
 import elementUI from 'element-ui';
 import api from './api';
+import store from './store';
 Vue.config.productionTip = false;
 Vue.use(elementUI);
 
 global.api = api;
 /* eslint-disable no-new */
 new Vue({
-  el: '#app',
-  router,
-  components: { App },
-  template: '<App/>'
+    el: '#app',
+    router,
+    store,
+    components: { App },
+    template: '<App/>'
 });
