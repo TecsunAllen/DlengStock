@@ -1,5 +1,5 @@
 const host = 'https://stock.xueqiu.com';
-export default {
+module.exports = {
     getApiUrl: (code, klineType, count, beginTime) => `${host}/v5/stock/chart/kline.json?symbol=${code}&begin=${beginTime}&period=${klineType}&type=before&count=${count}&indicator=kline,ma,macd,kdj,boll,rsi,wr,bias,cci,psy`,
     resMap: {
         timestamp: 0,

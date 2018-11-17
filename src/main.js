@@ -5,7 +5,7 @@ import App from './App';
 import router from './router';
 import elementUI from 'element-ui';
 import api from './api';
-import store from './store';
+import store from './store/index';
 Vue.config.productionTip = false;
 Vue.use(elementUI);
 

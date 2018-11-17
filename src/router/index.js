@@ -1,13 +1,13 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import vueStockList from '@/components/VueStockList';
+import stockList from '@/components/stockList';
 Vue.use(Router);
 export default new Router({
-	routes: [
-		{
-			path: '/',
-			name: 'HelloWorld',
-			component: vueStockList
-		}
-	]
+    routes: [
+        {
+            path: '/',
+            name: 'HelloWorld',
+            component: stockList
+        }
+    ]
 });

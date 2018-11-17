@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { klineConf } from './utils/klineMap';
+import { getApiUrl } from './utils/klineMap';
 
 axios.defaults.timeout = 6000;
 
@@ -11,7 +11,7 @@ export function getStockBasicInfo(code) {
 }
 
 export function getKline(code, endTimeStamp, lineCount, type) {
-    var apiUrl = klineConf.getApiUrl(code, type, -lineCount, endTimeStamp);
+    var apiUrl = getApiUrl(code, type, -lineCount, endTimeStamp);
     return axios.get(`/GetUrlResultProxy?url=${encodeURIComponent(apiUrl)}`);
 }
 

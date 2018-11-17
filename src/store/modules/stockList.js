@@ -1,26 +1,18 @@
-//state
-import Vue from 'vue';
-import Vuex from 'vuex';
+import { stockFilterBuilder } from '../../service/stockFilter.factory';
+import { getStockBasicInfo } from '../../api';
 
-import { stockFilterBuilder } from './service/stockFilter.service';
-
-import { getStockBasicInfo } from './api';
-
-import algorithms from './service/stockFilterAlgorithmService';
-
-Vue.use(Vuex);
-const store = new Vuex.Store({
+export default {
     state: {
         totalLength: 0,
         remainLength: 0,
         tableData: [],
         filterProgress: 0
+
     },
     mutations: {
         stockFilter(state, config) {
             stockFilterBuilder()
                 .setConfig(config)
-                .setAlgorithm(algorithms.wade)
                 .watchProgcess((result) => {
                     progressListener(result, this.state);
                 })
@@ -33,14 +25,13 @@ const store = new Vuex.Store({
             context.commit('stockFilter', config);
         }
     }
-});
-export default store;
+};
 
 
 function progressListener(result, state) {
-    state.totalLength = result.totalLength;
-    state.remainLength = result.remainLength;
-    state.filterProgress =
+    state.stockList.totalLength = result.totalLength;
+    state.stockList.remainLength = result.remainLength;
+    state.stockList.filterProgress =
         100 - parseInt((result.remainLength * 100) / result.totalLength);
     if (result.isGood) {
         getStockBasicInfo(result.code.code)
@@ -51,8 +42,8 @@ function progressListener(result, state) {
                 })
             )
             .then(data => {
-                state.tableData.push({
-                    companyName: result.code.name,
+                state.stockList.tableData.push({
+                    companyName: `${result.code.name}(${result.code.code})`,
                     pirce: result.stockInfo[5],
                     increase: result.stockInfo[7] + '%',
                     capital: data.capital,
@@ -61,4 +52,5 @@ function progressListener(result, state) {
             });
     }
 }
+
 

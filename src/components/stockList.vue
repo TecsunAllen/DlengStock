@@ -3,9 +3,9 @@
     <el-date-picker v-model="selectedDate" type="date" placeholder="选择日期">
     </el-date-picker>
     <el-button @click="startFilter" type="primary">start</el-button>
-    <div>{{totalLength - remainLength}}/{{totalLength}}</div>
-    <el-progress :text-inside="true" :stroke-width="18" :percentage="filterProgress" color="rgba(142, 113, 0, 1)"></el-progress>
-    <el-table :data="tableData" style="width: 100%" :default-sort = "{prop: 'capital', order: 'descending'}">
+    <div>{{stockList.totalLength - stockList.remainLength}}/{{stockList.totalLength}}</div>
+    <el-progress :text-inside="true" :stroke-width="18" :percentage="stockList.filterProgress" color="rgba(142, 113, 0, 1)"></el-progress>
+    <el-table :data="stockList.tableData" style="width: 100%" :default-sort = "{prop: 'capital', order: 'descending'}">
         <el-table-column prop="companyName" label="公司名称">
         </el-table-column>
         <el-table-column prop="pirce" label="价格">
@@ -21,7 +21,10 @@
 </template>
 
   <script>
+import { mapGetters, mapState } from "vuex";
 import codes from "../stocks";
+
+import algorithms from "../service/stockFilterAlgorithmService.js";
 
 export default {
   data() {
@@ -30,31 +33,22 @@ export default {
     };
   },
   computed: {
-    totalLength() {
-      return this.$store.state.totalLength;
-    },
-    remainLength() {
-      return this.$store.state.remainLength;
-    },
-    tableData() {
-      return this.$store.state.tableData;
-    },
-    filterProgress() {
-      return this.$store.state.filterProgress;
-    }
+    ...mapGetters(["stockList"])
   },
   methods: {
     startFilter() {
       const filterConfig = {
         codes,
-        lineCount: 6,
-        lineType: "week",
-        endTimeStamp: new Date(this.selectedDate).getTime()
+        endTimeStamp: this.selectedDate.getTime(),
+        algorithm: algorithms.wade,
+        concurrencyNumber: 10
       };
 
       this.$store.dispatch("stockFilter", filterConfig);
     }
   },
-  mounted() {}
+  mounted() {
+    this.selectedDate = new Date();
+  }
 };
 </script>

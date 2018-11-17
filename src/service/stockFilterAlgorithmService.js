@@ -1,48 +1,58 @@
 import { resMap } from '../utils/klineMap';
+import { getKline } from '../api';
+import { isCrossStar } from './stockAlgoUtils';
 
-export function wade(dataList) {
-    var result = false;
-    var isSmooth = (function () {
-        var macds = dataList.map((item) => item[resMap.macd]);
-        var minMacd = Math.min(...macds);
-        var minMacdIndex = macds.findIndex((item) => item == minMacd);
+function wade(formatedCode, endTimeStamp) {
+    return getKline(formatedCode, endTimeStamp, 6, 'week').then((res) => {
+        let dataList = res.data.data.item;
+        let result = false;
+        if (!dataList) return Promise.reject('数据无效');
+        let minMacdItem = (function () {
+            var macds = dataList.map((item) => item[resMap.macd]);
+            var minMacd = Math.min(...macds);
+            var minMacdIndex = macds.findIndex((item) => item == minMacd);
 
-        if (minMacdIndex === macds.length - 1) return false;
-        for (var i = minMacdIndex; i < macds.length; i++) {
-            if (macds[i] > (macds[i + 1])) return false;
+            if (minMacdIndex === macds.length - 1) return false;
+            for (var i = minMacdIndex; i < macds.length; i++) {
+                if (macds[i] > (macds[i + 1])) return false;
+            }
+            return {
+                minMacdIndex,
+                minMacdItem: dataList[minMacdIndex]
+            };
+        })();
+
+        /*         if (minMacdItem && minMacdItem.minMacdIndex == 4) {
+                    var lastItem = dataList[dataList.length - 1];
+                } */
+
+        if (!minMacdItem || minMacdItem.minMacdIndex === -1) return Promise.reject('数据无效');
+
+        let filterDataList = dataList.filter((item, index) => {
+            return minMacdItem && minMacdItem.minMacdIndex < index
+                //&& item[resMap.closePrice] > minMacdItem.minMacdItem[resMap.lowPrice]
+                //&& item[resMap.closePrice] < minMacdItem.minMacdItem[resMap.highPrice]
+                && item[resMap.closePrice] < Math.max(minMacdItem.minMacdItem[resMap.openPrice], minMacdItem.minMacdItem[resMap.closePrice]);
+        });
+
+        if (isCrossStar(minMacdItem.minMacdItem)
+            && filterDataList.length === 1
+            && dataList.indexOf(filterDataList[0]) == dataList.length - 1) {
+            result = true;
         }
-        return dataList[minMacdIndex];
-    })();
-
-    let lastItem = dataList.pop();
-    let olderItem_1 = dataList.pop();
-
-    var macd_0 = lastItem[resMap.macd];
-    var macd_1 = olderItem_1[resMap.macd];
-    var percent_0 = lastItem[resMap.percent];
-
-
-    var firstDownIndex = -1;
-    var matchCount = 0;
-    dataList.forEach((item, index) => {
-        if (
-            isSmooth &&
-            item[resMap.closePrice] > isSmooth[resMap.lowPrice]
-            && item[resMap.closePrice] < isSmooth[resMap.highPrice]
-        ) {
-            matchCount++;
-            firstDownIndex = index;
-        }
-    });
+        return Promise.resolve({
+            formatedCode,
+            isGood: result,
+            stockInfo: dataList.pop()
+        });
+    })
+        .catch(error => {
+            return Promise.reject(error);
+        });
 
 
-    if (
-        matchCount === 1 && firstDownIndex == dataList.length - 1
-    ) {
-        result = true;
-    }
-    return Promise.resolve({
-        isGood: result,
-        stockInfo: lastItem
-    });
 }
+
+export default {
+    wade
+};
